@@ -7,7 +7,7 @@ namespace QuickConnect
     {
         static void Postfix()
         {
-            if (Mod.customConnectionError.Value && ZNet.GetConnectionStatus() == ZNet.ConnectionStatus.ErrorConnectFailed)
+            if (ZNet.GetConnectionStatus() == ZNet.ConnectionStatus.ErrorConnectFailed)
             {
                 QuickConnectUI.instance.JoinServerFailed();
             }

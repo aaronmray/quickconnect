@@ -217,7 +217,10 @@ namespace QuickConnect
 
         public void JoinServerFailed()
         {
-            ShowError("Server connection failed");
+            if (Mod.customConnectionError.Value)
+            {
+                ShowError("Server connection failed");
+            }
             connecting = null;
         }
 

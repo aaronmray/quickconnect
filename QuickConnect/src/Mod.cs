@@ -5,7 +5,7 @@ using HarmonyLib;
 
 namespace QuickConnect
 {
-    [BepInPlugin("net.bdew.valheim.QuickConnect", "QuickConnect", "1.6.1")]
+    [BepInPlugin("net.bdew.valheim.QuickConnect", "QuickConnect", "1.7.0")]
     class Mod : BaseUnityPlugin
     {
         public static ManualLogSource Log;
