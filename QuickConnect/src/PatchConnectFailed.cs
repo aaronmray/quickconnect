@@ -2,13 +2,15 @@
 
 namespace QuickConnect
 {
-    [HarmonyPatch(typeof(ZSteamMatchmaking), "OnJoinServerFailed")]
+    [HarmonyPatch(typeof(ZNet), "OnDestroy")]
     class PatchConnectFailed
     {
         static void Postfix()
         {
-            if (QuickConnectUI.instance)
+            if (ZNet.GetConnectionStatus() == ZNet.ConnectionStatus.ErrorConnectFailed)
+            {
                 QuickConnectUI.instance.JoinServerFailed();
+            }
         }
     }
 }
