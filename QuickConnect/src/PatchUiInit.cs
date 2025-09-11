@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using UnityEngine;
 
 namespace QuickConnect
 {
@@ -8,12 +7,7 @@ namespace QuickConnect
     {
         static void Postfix()
         {
-            if (!QuickConnectUI.instance)
-            {
-                Servers.Init();
-                var go = new GameObject("QuickConnect");
-                QuickConnectUI.instance = go.AddComponent<QuickConnectUI>();
-            }
+            QuickConnectUI.instance.GetInstanceID();
         }
     }
 }

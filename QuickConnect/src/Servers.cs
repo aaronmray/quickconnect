@@ -18,7 +18,7 @@ namespace QuickConnect
 
             public override string ToString()
             {
-                return string.Format("Server(name={0},ip={1},port={2}}", name, ip, port);
+                return string.Format("Server(name={0},ip={1},port={2})", name, ip, port);
             }
         }
 
@@ -29,6 +29,8 @@ namespace QuickConnect
             entries.Clear();
             try
             {
+                var delimiter = Mod.customDelimiter.Value.Equals(String.Empty) ? ':' : Mod.customDelimiter.Value[0];
+
                 if (File.Exists(ConfigPath))
                 {
                     using (var file = new StreamReader(ConfigPath))
@@ -38,7 +40,7 @@ namespace QuickConnect
                         {
                             line = line.Trim();
                             if (line.Length == 0 || line.StartsWith("#")) continue;
-                            var split = line.Split(':');
+                            var split = line.Split(delimiter);
                             if (split.Length >= 3)
                             {
                                 var aName = split[0];
@@ -57,7 +59,7 @@ namespace QuickConnect
                             }
                             else
                             {
-                                Mod.Log.LogWarning("Invalid config line: " + line);
+                                Mod.Log.LogDebug("Invalid config line: " + line);
                             }
                         }
                         Mod.Log.LogInfo(string.Format("Loaded {0} server entries", entries.Count));
@@ -67,6 +69,7 @@ namespace QuickConnect
             catch (Exception ex)
             {
                 Mod.Log.LogError(string.Format("Error loading config {0}", ex));
+                QuickConnectUI.instance.ShowError("Error loading server config");
             }
         }
     }

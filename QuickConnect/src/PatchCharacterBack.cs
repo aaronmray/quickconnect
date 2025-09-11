@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using UnityEngine;
 
 namespace QuickConnect
 {
@@ -8,10 +7,7 @@ namespace QuickConnect
     {
         static void Postfix()
         {
-            if (QuickConnectUI.instance)
-            {
-                QuickConnectUI.instance.AbortConnect();
-            }
+            QuickConnectUI.instance.AbortConnect();
         }
     }
 }

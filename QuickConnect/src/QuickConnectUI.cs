@@ -8,18 +8,41 @@ namespace QuickConnect
 {
     class QuickConnectUI : MonoBehaviour
     {
-        public static QuickConnectUI instance;
+        private static QuickConnectUI _instance;
 
-        private Rect windowRect, lastRect, errorWinRect;
+        public static QuickConnectUI instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    Servers.Init();
+                    var go = new GameObject("QuickConnect");
+                    _instance = go.AddComponent<QuickConnectUI>();
+                }
+                return _instance;
+            }
+        }
+
+        public Rect windowRect, lastRect, errorWinRect;
         private Rect dragRect = new Rect(0, 0, 10000, 20);
         private int buttonFontSize;
         private int labelFontSize;
         private GUIStyle buttonStyle;
         private GUIStyle labelStyle;
+        public bool redraw = true;
+        private enum windowState
+        {
+            ServerList,
+            Connecting,
+            NoServers
+        }
+
+        private windowState state = windowState.ServerList;
 
         private Task<IPHostEntry> resolveTask;
-        private Servers.Entry connecting;
-        private string errorMsg;
+        public static Servers.Entry connecting;
+        private static string errorMsg;
 
         void Update()
         {
@@ -63,7 +86,7 @@ namespace QuickConnect
             }
         }
 
-        void Awake()
+        void Draw()
         {
             windowRect.x = Mod.windowPosX.Value;
             windowRect.y = Mod.windowPosY.Value;
@@ -76,16 +99,18 @@ namespace QuickConnect
             lastRect = windowRect;
         }
 
+        void Awake()
+        {
+            Draw();
+        }
+
         void OnGUI()
         {
             if (buttonStyle == null)
-            {
                 buttonStyle = new GUIStyle(GUI.skin.button);
-                buttonStyle.fontSize = buttonFontSize;
 
+            if (labelStyle == null)
                 labelStyle = new GUIStyle(GUI.skin.label);
-                labelStyle.fontSize = labelFontSize;
-            }
 
             if (errorMsg != null)
             {
@@ -100,6 +125,13 @@ namespace QuickConnect
                     Mod.windowPosY.Value = windowRect.y;
                     lastRect = windowRect;
                 }
+                else if (redraw)
+                {
+                    Draw();
+                    buttonStyle.fontSize = buttonFontSize;
+                    labelStyle.fontSize = labelFontSize;
+                    redraw = false;
+                }
             }
         }
 
@@ -108,6 +140,8 @@ namespace QuickConnect
             GUI.DragWindow(dragRect);
             if (connecting != null)
             {
+                CheckWindowState(windowState.Connecting);
+
                 GUILayout.Label("Connecting to " + connecting.name, labelStyle);
                 if (GUILayout.Button("Cancel", buttonStyle))
                 {
@@ -116,7 +150,16 @@ namespace QuickConnect
             }
             else if (Servers.entries.Count > 0)
             {
+                CheckWindowState(windowState.ServerList);
+
+                GUILayout.BeginHorizontal();
                 GUILayout.Label("Choose A Server:", labelStyle);
+                if (GUILayout.Button("Reload from Disk", buttonStyle))
+                {
+                    Servers.Init();
+                    DrawConnectWindow(windowID);
+                }
+                GUILayout.EndHorizontal();
                 foreach (var ent in Servers.entries)
                 {
                     if (GUILayout.Button(ent.name, buttonStyle))
@@ -127,8 +170,17 @@ namespace QuickConnect
             }
             else
             {
+                CheckWindowState(windowState.NoServers);
+
+                GUILayout.BeginHorizontal();
                 GUILayout.Label("No servers defined", labelStyle);
-                GUILayout.Label("Add quick_connect_servers.cfg", labelStyle);
+                if (GUILayout.Button("Reload from Disk", buttonStyle))
+                {
+                    Servers.Init();
+                    DrawConnectWindow(windowID);
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.Label("Add/modify quick_connect_servers.cfg", labelStyle);
             }
         }
 
@@ -156,7 +208,7 @@ namespace QuickConnect
             }
         }
 
-        public string CurrentPass()
+        public static string CurrentPass()
         {
             if (connecting != null)
                 return connecting.pass;
@@ -179,6 +231,15 @@ namespace QuickConnect
         {
             connecting = null;
             resolveTask = null;
+        }
+
+        private void CheckWindowState(windowState state)
+        {
+            if (this.state != state)
+            {
+                this.state = state;
+                Draw();
+            }
         }
     }
 }

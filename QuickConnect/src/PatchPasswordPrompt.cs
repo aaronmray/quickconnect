@@ -8,7 +8,7 @@ namespace QuickConnect
     {
         static bool Prefix(ZNet __instance, ZRpc rpc, bool needPassword, string serverPasswordSalt)
         {
-            string currentPass = QuickConnectUI.instance.CurrentPass();
+            string currentPass = QuickConnectUI.CurrentPass();
             if (currentPass != null)
             {
                 if (needPassword)
@@ -19,6 +19,7 @@ namespace QuickConnect
                     saltField.SetValue(null, serverPasswordSalt);
                     MethodInfo sendPeerMethod = typeof(ZNet).GetMethod("SendPeerInfo", BindingFlags.NonPublic | BindingFlags.Instance);
                     sendPeerMethod.Invoke(__instance, new object[] { rpc, currentPass });
+                    QuickConnectUI.connecting = null;
                     return false;
                 }
                 Mod.Log.LogInfo("Server didn't want password?");
